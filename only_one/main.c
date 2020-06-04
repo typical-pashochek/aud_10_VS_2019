@@ -4,17 +4,33 @@
 #include <stdio.h>
 #include <string.h>
 #include <wchar.h>
+#include <locale.h>
 
-int main()
+#define MAX_FILENAME_LEN 260
+
+int main(int argc, char* argv[])
 {
+    //setlocale(LC_ALL, "rus");
     HANDLE hProcessSnap;
     HANDLE hProcess;
     PROCESSENTRY32 pe32;
     DWORD dwPriorityClass;
     int Count = 0;
     int CountAll = 0;
-    char Name[] = { "only_one.exe " };
-    Name[11] = 0;
+    wchar_t* Name = (wchar_t*)malloc(MAX_FILENAME_LEN * sizeof(wchar_t));
+    int Len = strlen(argv[0]);
+    int i = Len;
+    while (argv[0][i] != '\\') {
+        i--;
+    }
+    for (int j = i + 1; j <= Len; j++) {
+        Name[j - i - 1] = argv[0][j];
+    }
+    for (int i = 0; i < wcslen(Name); i++) {
+        if ((int)Name[i] > 65472) {
+            Name[i] = (wchar_t)((int)Name[i] - 65472 + 1040);
+        }
+    }
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE)
     {
@@ -33,18 +49,9 @@ int main()
     {
         hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID);
         if (hProcess != NULL) {
-            int i = 0;
-            while (pe32.szExeFile[i] != 0) {
-                if (pe32.szExeFile[i] != Name[i]) {
-                    break;
-                }
-                if (i == 10) {
-                    flag += 1;
-
-                }
-                i++;
+            if (!wcscmp(Name, pe32.szExeFile)) {
+                flag++;
             }
-
             Count += 1;
         }
         CountAll += 1;

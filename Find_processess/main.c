@@ -28,13 +28,16 @@ int main()
     {
         hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe32.th32ProcessID);
         if (hProcess != NULL) {
-            _tprintf(TEXT("\nProcess ID = %d\t%s"), pe32.th32ProcessID, pe32.szExeFile);
+            int what;
+            WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), pe32.szExeFile, wcslen(pe32.szExeFile), &what, 0);
+            printf("\n");
+            //_tprintf(TEXT("\nProcess ID = %d\t%s"), pe32.th32ProcessID, pe32.szExeFile);
 
             Count += 1;
         }
         else {
             //_tprintf(TEXT("\n%s"), pe32.szExeFile);
-            _tprintf(TEXT("\nProcess ID = %d\tWARNING: OpenProcess failed with error %d ()"), pe32.th32ProcessID, GetLastError());
+            _tprintf(TEXT("Process ID = %d\tWARNING: OpenProcess failed with error %d ()\n"), pe32.th32ProcessID, GetLastError());
         }
         CountAll += 1;
 
